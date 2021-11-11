@@ -28,7 +28,6 @@ app.get('/getuser_info', function (req, res) {
         console.log(JSON.stringify(data, null, 2));
         // Prepare output in JSON format
         response = {data}
-        console.log(response);
         res.end(JSON.stringify(response, null, 2));
         })
         .catch(error => {
@@ -37,6 +36,6 @@ app.get('/getuser_info', function (req, res) {
  })
 
 
-app.listen(port, () => {            //server starts listening for any attempts from a client to connect at port: {port}
+app.listen(process.env.PORT || port, () => {            //server starts listening for any attempts from a client to connect at port: {port}
     console.log(`Now listening on port ${port}`); 
 });
