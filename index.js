@@ -1,14 +1,20 @@
 const express = require('express'); //Import the express dependency
 const app = express();              //Instantiate an express app, the main work horse of this server
 const port = 5000;                  //Save the port number where your server will be listening
+const path = require('path');
+app.use(express.static(__dirname));
 
 const ADODB = require('node-adodb'); // Microsoft Access database
 ADODB.debug = true;   
 const connection = ADODB.open('Provider=Microsoft.ACE.OLEDB.12.0;Data Source=Database.accdb;');
 
 //Idiomatic expression in express to route and respond to a client request
-app.get('/', (req, res) => {        //get requests to the root ("/") will route here
-    res.sendFile('index.html', {root: __dirname});      //server responds by sending the index.html file to the client's browser                                                        //the .sendFile method needs the absolute path to the file, see: https://expressjs.com/en/4x/api.html#res.sendFile 
+app.get('/login', (req, res) => {        //get requests to the root ("/") will route here
+    res.sendFile('Login.html', {root: __dirname});      //server responds by sending the index.html file to the client's browser                                                        //the .sendFile method needs the absolute path to the file, see: https://expressjs.com/en/4x/api.html#res.sendFile 
+});
+
+app.get('/register', (req, res) => {        //get requests to the root ("/") will route here
+    res.sendFile('Register.html', {root: __dirname});      //server responds by sending the index.html file to the client's browser                                                        //the .sendFile method needs the absolute path to the file, see: https://expressjs.com/en/4x/api.html#res.sendFile 
 });
 
 app.get('/getuser_info', function (req, res) {
