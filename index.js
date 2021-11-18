@@ -37,7 +37,7 @@ app.get('/getuser_info', function (req, res) {
  })
 
 app.get('/getAllCustomer', function (req, res) {
-    pool.query('SELECT * FROM public."User"', (error, results) => {
+    pool.query('SELECT * FROM public."user"', (error, results) => {
         if (error) {
             throw error
         }
