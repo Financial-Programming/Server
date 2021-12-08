@@ -18,13 +18,12 @@
                         Log in
                     </div>
                     <form action="" method="post">
-
                         <div class="form_text_ipt">
-                            <input name="username" type="text" placeholder="Phone number/Email">
+                            <input name="username" type="text" placeholder="Phone number/Email", id="username">
                         </div>
                         <div class="ececk_warning"><span>Data cannot be null</span></div>
                         <div class="form_text_ipt">
-                            <input name="password" type="password" placeholder="Password">
+                            <input name="password" type="password" placeholder="Password", id="password">
                         </div>
                         <div class="ececk_warning"><span>Data cannot be null</span></div>
                         <div class="form_check_ipt">
@@ -33,18 +32,17 @@
                             </div> -->
                         </div>
                         <div class="form_btn">
-                            <button type="button">Log in</button>
+                            <button type="button", onclick="validate()">Log in</button>
                         </div>
                         <div class="form_reg_btn">
-                            <span>Does not have an account？</span><a href="register">Register</a>
+                            <span>Does not have an account？</span><a href="/register">Register</a>
                         </div>
-
+                    </form>>
                 </div>
             </div>
         </div>
     </div>
-    <script type="text/javascript" src="js/jquery.min.js"></script>
-    <script type="text/javascript" src="js/common.js"></script>
+    <script type="text/javascript" src="login.js"></script> 
 </body>
 
 </html>

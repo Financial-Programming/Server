@@ -21,34 +21,35 @@
                         Register
                     </div>
                     <form action="" method="post">
+                        <div class="form_text_ipt">
+                            <input name="name" type="text" placeholder="Name" id="name">
+                        </div>
+                        <div class="form_text_ipt">
+                            <input name="email" type="text" placeholder="Phone number/email" id="email">
+                        </div>
+                        <div class="ececk_warning"><span>Data cannot be null</span></div>
+                        <div class="form_text_ipt">
+                            <input name="password" type="password" placeholder="Password" id="register_password">
+                        </div>
+                        <div class="ececk_warning"><span>Data cannot be null</span></div>
+                        <div class="form_text_ipt">
+                            <input name="repassword" type="password" placeholder="Repeat password" id="repassword">
+                        </div>
+                        <div class="ececk_warning"><span>Data cannot be null</span></div>
+                
 
-                        <div class="form_text_ipt">
-                            <input name="username" type="text" placeholder="Phone number/email">
+                        <div class="form_btn">
+                            <button type="button"  onclick="register()">Register</button>
                         </div>
-                        <div class="ececk_warning"><span>Data cannot be null</span></div>
-                        <div class="form_text_ipt">
-                            <input name="password" type="password" placeholder="Password">
+                        <div class="form_reg_btn">
+                            <span>Already have an account？</span><a href="survey.html">Login</a>
                         </div>
-                        <div class="ececk_warning"><span>Data cannot be null</span></div>
-                        <div class="form_text_ipt">
-                            <input name="repassword" type="password" placeholder="Repeat password">
-                        </div>
-                        <div class="ececk_warning"><span>Data cannot be null</span></div>
+                    </form>>
                 </div>
-
-                <div class="form_btn">
-                    <button type="button">Register</button>
-                </div>
-                <div class="form_reg_btn">
-                    <span>Already have an account？</span><a href="Login.html">Login</a>
-                </div>
-                </form>
             </div>
         </div>
     </div>
-    </div>
-    <script type="text/javascript" src="js/jquery.min.js"></script>
-    <script type="text/javascript" src="js/common.js"></script>
+    <script type="text/javascript" src="login.js"></script> 
 </body>
 
 </html>

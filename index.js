@@ -26,6 +26,10 @@ app.get('/register', (req, res) => {
     res.sendFile('Register.html', {root: __dirname});      
 });
 
+app.get('/survey', (req, res) => {        
+    res.sendFile('survey.html', {root: __dirname});      
+});
+
 app.get('/getuser_info', function (req, res) {
     // Prepare output in JSON format
     response = {
@@ -35,6 +39,18 @@ app.get('/getuser_info', function (req, res) {
     console.log(response);
     res.end(JSON.stringify(response));
  })
+
+
+ //get all customer 
+app.get('/getAllCustomer', function (req, res) {
+    pool.query('SELECT * FROM public."user"', (error, results) => {
+        if (error) {
+            throw error
+        }
+        console.log(JSON.stringify(results, null, 2));
+        res.end(JSON.stringify(results.rows, null, 2));
+    })
+})
 
 app.get('/getAllCustomer', function (req, res) {
     pool.query('SELECT * FROM public."user"', (error, results) => {
@@ -50,17 +66,14 @@ app.get('/getAllCustomer', function (req, res) {
 app.post('/registerAuth', function (req, res) {
     email = "'"+req.body.email+"'";;
     password = req.body.password;
-    username = "'"+req.body.name+"'";
+    username = "'"+req.body.username+"'";
     console.log(req.body);
-    console.log(email);
-    console.log(password);
     sql_statement = 'INSERT INTO public."user" (email,password,name) VALUES ( ' +email+ ', '+password+','+username+')';
     console.log(sql_statement);
     pool.query(sql_statement, (error, results) => {
         if (error) {
             throw error
         }
-
         res.end(JSON.stringify(  {
             "register_Status": "success"
         }, null, 2));
@@ -82,13 +95,11 @@ app.get('/loginAuth', function (req, res) {
         }
         console.log(JSON.stringify(results, null, 2));
         if (results.rows.length>0){
-            res.end(JSON.stringify(results.rows, null, 2));
+            res.end(JSON.stringify(results.rows[0], null, 2));
         }
         res.end(JSON.stringify({auth_fail: 'username and password not matching'}, null, 2));
     })
 })
-
-
 
 app.listen(process.env.PORT || port, () => {            //server starts listening for any attempts from a client to connect at port: {port}
     console.log(`Now listening on port ${port}`); 
