@@ -5,7 +5,7 @@ function validate(){
 
     if(username&&password){
         //auth api 
-        url = "http://localhost:5000/loginAuth?email='"+username+"'&password='"+password+"'";
+        url = "https://financialprogramming.herokuapp.com/loginAuth?email='"+username+"'&password='"+password+"'";
         fetch(url).then(response=>response.json())
             .then((data)=>{
                 if (data["auth_fail"]){
@@ -32,7 +32,7 @@ function register(){
         alert("password not matched");
     }else if(name && email && register_password && re_password){
         //auth api 
-        url = "http://localhost:5000/registerAuth";
+        url = "https://financialprogramming.herokuapp.com/registerAuth";
 
         let _data = {
             email: email,
