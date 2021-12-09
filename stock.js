@@ -5,5 +5,5 @@ yahooFinance.quote({
     modules: ['price']       // optional; default modules.
   }, function(err, quote) {
     
-  });
+ });
 

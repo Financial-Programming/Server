@@ -3,12 +3,14 @@ const app = express();              //Instantiate an express app, the main work 
 const port = process.env.PORT || 80;             //Save the port number where your server will be listening
 const path = require('path');
 const bodyParser = require("body-parser");
+var yahooFinance = require('yahoo-finance');
+var session = require( "express-session");
 
 //Here we are configuring express to use body-parser as middle-ware.
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(express.static(__dirname));
-
+app.use(session({ secret:"123456", resave:false, saveUninitialized: true }))
 
 const { Pool } = require("pg");
 
@@ -93,13 +95,52 @@ app.get('/loginAuth', function (req, res) {
         if (error) {
             throw error
         }
-        console.log(JSON.stringify(results, null, 2));
+        //console.log(JSON.stringify(results, null, 2));
         if (results.rows.length>0){
+            req.session.user = results.rows[0];
             res.end(JSON.stringify(results.rows[0], null, 2));
         }
         res.end(JSON.stringify({auth_fail: 'username and password not matching'}, null, 2));
     })
 })
+
+app.get('/stock', function (req, res) {
+    stock =  req.query.symbol;
+    yahooFinance.quote({
+        symbol: stock,
+        modules: ['price']       // optional; default modules.
+      }, function(err, quote) {
+        console.log(quote)
+        res.end(JSON.stringify( quote));
+     });
+
+    // password = req.query.password;
+    // console.log(email);
+    // console.log(password);
+    // sql_statement = 'SELECT * FROM public."user" WHERE email = '+email + ' and password = '+ password;
+    // console.log(sql_statement);
+    // pool.query(sql_statement, (error, results) => {
+    //     if (error) {
+    //         throw error
+    //     }
+    //     console.log(JSON.stringify(results, null, 2));
+    //     if (results.rows.length>0){
+    //         res.end(JSON.stringify(results.rows[0], null, 2));
+    //     }
+    //     res.end(JSON.stringify({auth_fail: 'username and password not matching'}, null, 2));
+    // })
+})
+
+app.get('/dashboard', function (req, res) {
+    // Prepare output in JSON format 
+    res.sendFile('dashboard.html', {root: __dirname});   
+ })
+  
+
+app.get('/logout',function(req,res) {
+    req.session.user = null;
+    res.redirect('/');
+}) 
 
 app.listen(process.env.PORT || port, () => {            //server starts listening for any attempts from a client to connect at port: {port}
     console.log(`Now listening on port ${port}`); 
