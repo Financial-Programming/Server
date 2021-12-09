@@ -48,7 +48,7 @@ function register(){
         .then(response => response.json()) 
         .then(json => {
             alert("registered account"); 
-            window.location = "index.html"      
+            window.location = "/login"      
         })
         .catch(err => alert(err))
     }else{
