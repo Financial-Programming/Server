@@ -135,12 +135,52 @@ app.get('/dashboard', function (req, res) {
     // Prepare output in JSON format 
     res.sendFile('dashboard.html', {root: __dirname});   
  })
+
+ app.get('/stocklist', function (req, res) {
+    sql_statement = 'SELECT * FROM public."stock" WHERE uid ='+ req.session.user.id;
+    console.log(sql_statement);
+    pool.query(sql_statement, (error, results) => {
+        if (error) {
+            throw error
+        }
+         
+
+        console.log(results.rows);
+        
+        //results = [];
+        for (var i = 0; i < results.rows.length; i++)  {  
+            console.log(results.rows[i])
+            yahooFinance.quote({
+                symbol: results.rows[i].symbol,    
+                modules: ['price']       // optional; default modules.
+              }, function(err, quote) {
+                console.log(quote)
+                res.end(JSON.stringify( quote));
+             });  
+        }
+        res.end(JSON.stringify(results.rows , null, 2));
+        // if (results.rows.length>0){
+        //     req.session.user = results.rows[0];
+        //     res.end(JSON.stringify(results.rows[0], null, 2));
+        // }
+        // res.end(JSON.stringify({auth_fail: 'username and password not matching'}, null, 2));
+    }) 
+})
+
+
+ app.get('/user_info', function (req, res) {
+    // Prepare output in JSON format 
+    res.end(JSON.stringify( req.session.user));
+ })
   
 
 app.get('/logout',function(req,res) {
     req.session.user = null;
     res.redirect('/');
 }) 
+
+
+
 
 app.listen(process.env.PORT || port, () => {            //server starts listening for any attempts from a client to connect at port: {port}
     console.log(`Now listening on port ${port}`); 

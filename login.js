@@ -5,8 +5,8 @@ function validate(){
 
     if(username&&password){
         //auth api 
-        //url = "http://localhost/loginAuth?email='"+username+"'&password='"+password+"'";
-        url = "https://financialprogramming.herokuapp.com/loginAuth?email='"+username+"'&password='"+password+"'";
+         url = "http://localhost/loginAuth?email='"+username+"'&password='"+password+"'";
+        //url = "https://financialprogramming.herokuapp.com/loginAuth?email='"+username+"'&password='"+password+"'";
         fetch(url).then(response=>response.json())
             .then((data)=>{
                 if (data["auth_fail"]){
