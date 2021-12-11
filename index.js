@@ -142,22 +142,21 @@ app.get('/dashboard', function (req, res) {
     pool.query(sql_statement, (error, results) => {
         if (error) {
             throw error
-        }
-         
-
-        console.log(results.rows);
+        } 
+        //console.log(results.rows);
         
         //results = [];
         for (var i = 0; i < results.rows.length; i++)  {  
-            console.log(results.rows[i])
+            //console.log(results.rows[i])
             yahooFinance.quote({
                 symbol: results.rows[i].symbol,    
                 modules: ['price']       // optional; default modules.
               }, function(err, quote) {
-                console.log(quote)
+                //console.log(quote)
                 res.end(JSON.stringify( quote));
              });  
         }
+        req.session.stocklist =  results.rows; 
         res.end(JSON.stringify(results.rows , null, 2));
         // if (results.rows.length>0){
         //     req.session.user = results.rows[0];
@@ -171,8 +170,77 @@ app.get('/dashboard', function (req, res) {
  app.get('/user_info', function (req, res) {
     // Prepare output in JSON format 
     res.end(JSON.stringify( req.session.user));
- })
-  
+ }) 
+ // Insert
+app.post('/buy', function(req,res){ 
+    console.log(req.session.stocklist);
+    if (req.session.stocklist.some(item => item.symbol === req.body.symbol)){
+        //alread have stocks
+        // update the row
+        old_record = req.session.stocklist.filter(item => item.symbol == req.body.symbol )[0]; 
+        new_volume = parseInt(old_record.volume)+parseInt(req.body.volume); 
+        new_price = (parseInt(old_record.volume)*parseInt(old_record.price) +parseInt(req.body.price) *parseInt(req.body.volume)) /parseInt(new_volume) ; 
+     
+        sql_statement = 'UPDATE public."stock" SET volume = '+new_volume+', price = '+new_price+' WHERE id = '+old_record.id+' RETURNING *;'; 
+        console.log(sql_statement); 
+        pool.query(sql_statement, (error, results) => {
+            if (error) {
+                throw error
+            } 
+            console.log(results.rows);
+        }) 
+    }else{
+        // insert new row
+        sql_statement = 'INSERT INTO public."stock" (uid, symbol, volume, price, date)  VALUES ( ' +req.session.user.id+ ', \''+req.body.symbol+ '\', '+req.body.volume+','+req.body.price+',\''+new Date().toISOString().split('T')[0]+'\')'; 
+        console.log(sql_statement);
+        pool.query(sql_statement, (error, results) => {
+            if (error) {
+                throw error
+            } 
+            console.log(results.rows);
+            
+            res.end(JSON.stringify(results.rows , null, 2)); 
+        }) 
+    }
+ });
+
+ app.post('/sell', function(req,res){ 
+    console.log(req.session.stocklist);
+    if (req.session.stocklist.some(item => item.symbol === req.body.symbol)){
+        //alread have stocks
+        // update the row
+        old_record = req.session.stocklist.filter(item => item.symbol == req.body.symbol )[0]; 
+        new_volume = parseInt(old_record.volume)-parseInt(req.body.volume); 
+        if (new_volume==0) {
+            // delete
+            sql_statement = 'DELETE FROM public."stock" WHERE id = '+old_record.id+'AND symbol = \''+req.body.symbol+'\'';  
+            console.log(sql_statement); 
+            pool.query(sql_statement, (error, results) => {
+                if (error) {
+                    throw error
+                } 
+                console.log(results.rows);
+            }) 
+        } else if (new_volume<0) {
+            // not enough for sell
+            res.status(500).send('Volume error'); 
+        } else{
+            new_price = (parseInt(old_record.volume)*parseInt(old_record.price) -parseInt(req.body.price) *parseInt(req.body.volume)) /parseInt(new_volume) ; 
+     
+            sql_statement = 'UPDATE public."stock" SET volume = '+new_volume+', price = '+new_price+' WHERE id = '+old_record.id+' RETURNING *;'; 
+            console.log(sql_statement); 
+            pool.query(sql_statement, (error, results) => {
+                if (error) {
+                    throw error
+                } 
+                console.log(results.rows);
+            }) 
+        }  
+    }else{
+        // no history
+        res.status(500).send('Something broke!'); 
+    }
+ });
 
 app.get('/logout',function(req,res) {
     req.session.user = null;

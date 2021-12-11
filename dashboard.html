@@ -15,12 +15,37 @@
         <p> Welcome! </p>
         <p id="name">user</p>
         <br>
+        <p2>Buy form</p2>
+        <form id = "buy">
+            <ul>
+               <label for="symbol1">Symbol:</label>
+               <input type="text" id="symbol1" name="symbol">
+               <label for="price1">Price:</label>
+               <input type="number" id="price1" name="price">
+               <label for="volume1">Volum:</label>
+               <input type="number" id="volume2" name="volume">
+                <button type ="submit" onclick="setTimeout(function () { window.location.reload()  }, 3)" >Submit</button>
+            </ul>
+          </form>
+          <p2>Sell form</p2>
+        <form id="sell">
+            <ul>
+               <label for="symbol2">Symbol :</label>
+               <input type="text" id="symbol2" name="symbol">
+                <label for="price2">Price:</label>
+                <input type="number" id="price2" name="price">
+               <label for="volume2">Volum:</label>
+               <input type="number" id="volume2" name="volume">
+                <button type ="submit" onclick="setTimeout(function () { window.location.reload()  }, 3)">Submit</button>
+
+            </ul>
+          </form>
         <p1> your simulation trade </p1>
         <table id="example" class="display" width="100%"></table> 
          
     </body>
     <script>
-         //url = "http://localhost/user_info";
+        //url = "http://localhost/user_info";
         url = "https://financialprogramming.herokuapp.com/user_info";
          
         fetch(url).then(response=>response.json())
@@ -30,15 +55,15 @@
                 $(document).ready(function() {
                     $('#example').DataTable( {
                         ajax: {
-                            //url = "http://localhost/stocklist";
+                            //url:"http://localhost/stocklist",
                             url:"https://financialprogramming.herokuapp.com/stocklist",
                             dataSrc:""
-                        }, 
+                        },  
                         columns: [ 
-                            { data: "symbol" },
-                            { data: "volume" },
-                            { data: "price" },
-                            { data: "date" }, 
+                            { data: "symbol" , title:"Stock_Symbol" },
+                            { data: "volume" , title: "Current_Volume" },
+                            { data: "price" , title: "Price"},
+                            { data: "date",  title: "Date" }, 
                         ]
                     } );
                 } );
@@ -47,5 +72,43 @@
             .catch(err =>  {
                 alert(err);
          }); 
+    </script>
+    <script>
+      $('#buy').submit(function(e){
+          e.preventDefault();
+          $.ajax({
+              url: '/buy',
+              type: 'post',
+              data: $('#buy').serialize(),
+              success:function(data){
+                  // Whatever you want to do after the form is successfully submitted
+                  alert("Your transcation is completed");
+                  setTimeout(() => {
+                    location.reload()
+                  },3000);  
+              },
+              error: function(data) {
+                  alert(data);
+              }
+          });
+      });
+      $('#sell').submit(function(e){
+          e.preventDefault();
+          $.ajax({
+              url: 'sell',
+              type: 'post',
+              data: $('#sell').serialize(),
+              success:function(data){
+                  // Whatever you want to do after the form is successfully submitted
+                  alert("Your transcation is completed");
+                  setTimeout(() => {
+                    location.reload()
+                  }, 3000);  
+              },
+              error: function(data) {
+                  alert(data);
+              }
+          });
+      });
     </script>
 </html>
