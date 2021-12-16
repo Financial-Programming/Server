@@ -79,30 +79,64 @@
                         },  
                         columns: [ 
                             { data: "symbol" , title:"Stock_Symbol" },
-                            { data: "volume" , title: "Current_Volume" },
-                            { data: "price" , title: "Price"},
-                            { data: "date",  title: "Date" }, 
-                            { data: "current_price",  title: "Current_price" }, 
-                            { data: "DayLow",  title: "DayLow" }, 
-                            { data: "DayHigh",  title: "DayHigh" }, 
-                            { data: "Daychange",  title: "Daychange" }, 
+                            { data: "volume" , title: " Volume" },
+                            { data: "price" , title: "$Price"}, 
                             {data:null,
-                                title: "gain/loss",
+                                title: "spend",
+                                render: function(data, type, row) {
+                                    return parseInt(data.price)*parseInt(data.volume); 
+                                }
+                            }, 
+                            { data: "current_price",  title: "$Current_price" }, 
+                            { data: "DayLow",  title: "$DayLow" }, 
+                            { data: "DayHigh",  title: "$DayHigh" }, 
+                            { data: "Daychange",  title: "$Daychange" }, 
+                            {data:null,
+                                title: "$gain/loss per share",
                                 render: function(data, type, row) {
                                     value = parseInt( data.current_price) - parseInt(data.price);
-                                    if (data > 0) { // here is your condition
+                                    if (value > 0) { // here is your condition
                                         return '<div style="color:green;">' + value + '</div>';
                                     } else {
                                         return '<div style="color:red;">' + value + '</div>';
                                     } 
                                 }
-                            }
+                            },
+                            {data:null,
+                                title: "$gain/loss total",
+                                render: function(data, type, row) {
+                                    value = (parseInt( data.current_price) - parseInt(data.price))*data.volume;
+                                    if (value > 0) { // here is your condition
+                                        return '<div style="color:green;">' + value + '</div>';
+                                    } else {
+                                        return '<div style="color:red;">' + value + '</div>';
+                                    } 
+                                }
+                            },
+                            {data:null,
+                                title: "gain/loss total percentage",
+                                render: function(data, type, row) { 
+                                    value =  ( (data.current_price-data.price)/data.price*100).toFixed(2) 
+                                    display = value+"%"
+                                    if (value > 0) { // here is your condition
+                                        return '<div style="color:green;">' + display + '</div>';
+                                    } else {
+                                        return '<div style="color:red;">' + display + '</div>';
+                                    } 
+                                }
+                            },
+                            {data:null,
+                                title: "Date",
+                                render: function(data, type, row) {
+                                    return data.date.substring(0,10) 
+                                }
+                            },
                         ],
                         columnDefs: [
                             {
                                 targets: 7, // this means controlling cells in column 1
                                 render: function(data, type, row, meta) { 
-                                    value = parseInt(Math.abs(data*100)) + "%"
+                                    value = parseInt( data*100)  + "%"
                                     if (data > 0) { // here is your condition
                                         return '<div style="color:green;">' + value + '</div>';
                                     } else {
