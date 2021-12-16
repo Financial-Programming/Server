@@ -5,6 +5,8 @@ const path = require('path');
 const bodyParser = require("body-parser");
 var yahooFinance = require('yahoo-finance');
 var session = require( "express-session");
+const { spawn } = require("child_process");
+const { PythonShell } = require('python-shell');
 
 //Here we are configuring express to use body-parser as middle-ware.
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -19,18 +21,26 @@ const pool = new Pool({
     ssl: { rejectUnauthorized: false }, // Only enable TLS/SSL connections for Heroku. 
 })
 
+app.get('/', (req, res) => {        
+    res.sendFile('/templates/index.html', {root: __dirname});      
+});
 
 app.get('/login', (req, res) => {        
-    res.sendFile('Login.html', {root: __dirname});      
+    res.sendFile('/templates/Login.html', {root: __dirname});      
 });
 
 app.get('/register', (req, res) => {        
-    res.sendFile('Register.html', {root: __dirname});      
+    res.sendFile('/templates/Register.html', {root: __dirname});      
 });
 
 app.get('/survey', (req, res) => {        
-    res.sendFile('survey.html', {root: __dirname});      
+    res.sendFile('/templates/survey.html', {root: __dirname});      
 });
+
+app.get('/dashboard', function (req, res) {
+    // Prepare output in JSON format 
+    res.sendFile('/templates/dashboard.html', {root: __dirname});   
+ })
 
 app.get('/getuser_info', function (req, res) {
     // Prepare output in JSON format
@@ -66,8 +76,8 @@ app.get('/getAllCustomer', function (req, res) {
 
 //register user
 app.post('/registerAuth', function (req, res) {
-    email = "'"+req.body.email+"'";;
-    password = req.body.password;
+    email = "'"+req.body.email+"'"; 
+    password = "'"+req.body.password+"'";
     username = "'"+req.body.username+"'";
     console.log(req.body);
     sql_statement = 'INSERT INTO public."user" (email,password,name) VALUES ( ' +email+ ', '+password+','+username+')';
@@ -129,40 +139,33 @@ app.get('/stock', function (req, res) {
     //     }
     //     res.end(JSON.stringify({auth_fail: 'username and password not matching'}, null, 2));
     // })
-})
+}) 
 
-app.get('/dashboard', function (req, res) {
-    // Prepare output in JSON format 
-    res.sendFile('dashboard.html', {root: __dirname});   
- })
-
- app.get('/stocklist', function (req, res) {
+ app.get('/stocklist',  function (req, res) {
     sql_statement = 'SELECT * FROM public."stock" WHERE uid ='+ req.session.user.id;
     console.log(sql_statement);
-    pool.query(sql_statement, (error, results) => {
+    
+    pool.query(sql_statement, async(error, results) => {
         if (error) {
             throw error
         } 
         //console.log(results.rows);
         
         //results = [];
-        for (var i = 0; i < results.rows.length; i++)  {  
-            //console.log(results.rows[i])
-            yahooFinance.quote({
+        for (var i = 0; i < results.rows.length; i++)  {   
+            await yahooFinance.quote({
                 symbol: results.rows[i].symbol,    
                 modules: ['price']       // optional; default modules.
-              }, function(err, quote) {
-                //console.log(quote)
-                res.end(JSON.stringify( quote));
+              }, function(err, quote) { 
+                results.rows[i]["current_price"] = quote["price"]["regularMarketPrice"]
+                results.rows[i]["DayLow"] = quote["price"]["regularMarketDayLow"]
+                results.rows[i]["DayHigh"] = quote["price"]["regularMarketDayHigh"]
+                results.rows[i]["Daychange"] = quote["price"]["regularMarketChangePercent"]
+                 
              });  
         }
-        req.session.stocklist =  results.rows; 
-        res.end(JSON.stringify(results.rows , null, 2));
-        // if (results.rows.length>0){
-        //     req.session.user = results.rows[0];
-        //     res.end(JSON.stringify(results.rows[0], null, 2));
-        // }
-        // res.end(JSON.stringify({auth_fail: 'username and password not matching'}, null, 2));
+        req.session.stocklist =  results.rows;  
+        res.end(JSON.stringify(results.rows , null, 2)); 
     }) 
 })
 
@@ -242,13 +245,42 @@ app.post('/buy', function(req,res){
     }
  });
 
+ app.post('/recommend', function(req,res){ 
+     stock1 = req.body.stock1
+     stock2 = req.body.stock2
+     stock3 = req.body.stock3
+     gain = req.body.gain
+     console.log(stock1,stock2,stock3,gain)
+    //  const py = spawn("python", ["portfolio.py", stock1,stock2,stock3,gain]);
+    //  py.stdout.on("data", (data) => {
+    //     data2send = data.toString();
+    // });
+    // console.log(data2send);
+    let options = {
+        mode: 'text', 
+        pythonOptions: ['-u'], // get print results in real-time 
+        args: [stock1,stock2,stock3,gain]
+    };
+    
+    PythonShell.run('portfolio.py', options, function(err, results) {
+        if (err){
+            console.log(err);
+        } else{
+            answer = {
+                "weight1": results[0],
+                "weight2": results[1],
+                "weight3": results[2]
+            }
+            res.send(answer);     
+        }
+        // results is an array consisting of messages collected during execution
+    });
+ });
+
 app.get('/logout',function(req,res) {
     req.session.user = null;
     res.redirect('/');
-}) 
-
-
-
+})  
 
 app.listen(process.env.PORT || port, () => {            //server starts listening for any attempts from a client to connect at port: {port}
     console.log(`Now listening on port ${port}`); 

@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head> 
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="https://cdn.datatables.net/1.11.3/css/jquery.dataTables.min.css">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+        <script src="https://cdn.datatables.net/1.11.3/js/jquery.dataTables.min.js"></script> 
+        <title>Fiancial Programming Simple App</title>
+          
+    </head>
+    <body>
+        <ul>
+            <div> Welcome! </div>
+            <div id="name">user</div>   
+           <a href="/logout"> logout</a>
+        </ul> 
+        <title>investment strategy </title> 
+        <br>
+        <p2> Our recommendation portfolio</p2>
+        <form id = "recommendation">
+            <ul>
+               <label for="stock1">Symbol1:</label>
+               <input type="text" id="stock1" name="stock1">
+               <label for="stock2">Symbol2:</label>
+               <input type="text" id="stock2" name="stock2">
+               <label for="stock3">Symbol3:</label>
+               <input type="text" id="stock3" name="stock3">
+               <br> 
+               <label for="expect gain">Expect gain:</label>
+               <input type="number" id="gain" name="gain" value="0.5" max="1.0" min="0.0" step="0.02">
+                <button type ="submit">Submit</button>
+                <label id="result"> Result  </label>
+            </ul>
+          </form> 
+        <p2>Buy form</p2> 
+        <form id = "buy">
+            <ul>
+               <label for="symbol1">Symbol:</label>
+               <input type="text" id="symbol1" name="symbol">
+               <label for="price1">Price:</label>
+               <input type="number" id="price1" name="price">
+               <label for="volume1">Volum:</label>
+               <input type="number" id="volume2" name="volume">
+                <button type ="submit" onclick="setTimeout(function () { window.location.reload()  }, 3)">Submit</button>
+            </ul>
+          </form>
+          <p2>Sell form</p2>
+        <form id="sell">
+            <ul>
+               <label for="symbol2">Symbol :</label>
+               <input type="text" id="symbol2" name="symbol">
+                <label for="price2">Price:</label>
+                <input type="number" id="price2" name="price">
+               <label for="volume2">Volum:</label>
+               <input type="number" id="volume2" name="volume">
+                <button type ="submit" onclick="setTimeout(function () { window.location.reload()  }, 3)">Submit</button>
+
+            </ul>
+          </form>
+        <p1> your simulation trade </p1>
+        <table id="example" class="display" width="100%"></table> 
+         
+    </body>
+    <script> 
+         url = "http://localhost/user_info";
+        //url = "https://financialprogramming.herokuapp.com/user_info";
+         
+        fetch(url).then(response=>response.json())
+            .then((data)=>{ 
+                console.log( data);
+                document.getElementById("name").innerHTML = data.name;
+                $(document).ready(function() {
+                    $('#example').DataTable( {
+                        ajax: {
+                            url:"http://localhost/stocklist",
+                            //url:"https://financialprogramming.herokuapp.com/stocklist",
+                            dataSrc:""
+                        },  
+                        columns: [ 
+                            { data: "symbol" , title:"Stock_Symbol" },
+                            { data: "volume" , title: "Current_Volume" },
+                            { data: "price" , title: "Price"},
+                            { data: "date",  title: "Date" }, 
+                            { data: "current_price",  title: "Current_price" }, 
+                            { data: "DayLow",  title: "DayLow" }, 
+                            { data: "DayHigh",  title: "DayHigh" }, 
+                            { data: "Daychange",  title: "Daychange" }, 
+                            {data:null,
+                                title: "gain/loss",
+                                render: function(data, type, row) {
+                                    value = parseInt( data.current_price) - parseInt(data.price);
+                                    if (data > 0) { // here is your condition
+                                        return '<div style="color:green;">' + value + '</div>';
+                                    } else {
+                                        return '<div style="color:red;">' + value + '</div>';
+                                    } 
+                                }
+                            }
+                        ],
+                        columnDefs: [
+                            {
+                                targets: 7, // this means controlling cells in column 1
+                                render: function(data, type, row, meta) { 
+                                    value = parseInt(Math.abs(data*100)) + "%"
+                                    if (data > 0) { // here is your condition
+                                        return '<div style="color:green;">' + value + '</div>';
+                                    } else {
+                                        return '<div style="color:red;">' + value + '</div>';
+                                    }
+                                }
+                            },
+                             
+                        ]
+                    } );
+                } );
+
+            })
+            .catch(err =>  {
+                alert(err);
+         }); 
+    </script>
+    <script>
+      $('#buy').submit(function(e){
+          e.preventDefault();
+          $.ajax({
+              url: '/buy',
+              type: 'post',
+              data: $('#buy').serialize(),
+              success:function(data){
+                  // Whatever you want to do after the form is successfully submitted
+                  alert("Your transcation is completed");
+                   
+              },
+              error: function(data) {
+                  alert(data);
+              }
+          });
+      });
+      $('#sell').submit(function(e){
+          e.preventDefault();
+          $.ajax({
+              url: '/sell',
+              type: 'post',
+              data: $('#sell').serialize(),
+              success:function(data){
+                  // Whatever you want to do after the form is successfully submitted
+                  alert("Your transcation is completed");
+                   
+              },
+              error: function(data) {
+                  alert(data);
+              }
+          });
+      });
+    </script>
+    <script>
+        $('#recommendation').submit(function() { // intercepts the submit event
+            $("#result").html("calculating your portfolio...")
+            $.ajax({ // make an AJAX request
+                type: "POST",
+                url: "/recommend", // it's the URL of your component B
+                data: $("#recommendation").serialize(), // serializes the form's elements
+                success: function(data){
+                    // show the data you got from B in result div
+                    console.log(data)
+                    $("#result").html("Your recommendation portfolio weight are "+ data.weight1+ "% " +data.weight2+"% "+data.weight3+"%");
+                }
+            }); 
+            return false;
+        }); 
+    </script>
+</html>
