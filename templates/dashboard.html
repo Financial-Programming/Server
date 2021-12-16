@@ -63,8 +63,8 @@
          
     </body>
     <script> 
-         url = "http://localhost/user_info";
-        //url = "https://financialprogramming.herokuapp.com/user_info";
+         //url = "http://localhost/user_info";
+        url = "https://financialprogramming.herokuapp.com/user_info";
          
         fetch(url).then(response=>response.json())
             .then((data)=>{ 
@@ -73,8 +73,8 @@
                 $(document).ready(function() {
                     $('#example').DataTable( {
                         ajax: {
-                            url:"http://localhost/stocklist",
-                            //url:"https://financialprogramming.herokuapp.com/stocklist",
+                            //url:"http://localhost/stocklist",
+                            url:"https://financialprogramming.herokuapp.com/stocklist",
                             dataSrc:""
                         },  
                         columns: [ 
